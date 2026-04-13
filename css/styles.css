@@ -67,7 +67,8 @@ main{padding:32px 0 16px}
 .stor-total{font-family:var(--mono);font-size:11px;color:var(--text-muted);text-align:center}
 
 /* === HERO CARD (files backup) === */
-.hero-card{background:linear-gradient(135deg,var(--surface),#161e2e);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r-lg);overflow:hidden;margin-bottom:20px}
+.hero-card{background:linear-gradient(135deg,var(--surface),#161e2e);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r-lg);overflow:hidden;margin-bottom:20px;transition:box-shadow .2s}
+.hero-card:hover{box-shadow:0 0 0 1px rgba(72,79,88,.7),0 8px 28px rgba(0,0,0,.25)}
 .hero-card.failed{border-left-color:var(--red)}
 .hero-hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 18px;background:rgba(0,0,0,.22);border-bottom:1px solid var(--border)}
 .hero-hdr-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
@@ -92,7 +93,7 @@ main{padding:32px 0 16px}
 
 /* === BACKUP CARD === */
 .bcard{background:linear-gradient(135deg,var(--surface),#161e2e);border:1px solid var(--border);border-left:3px solid transparent;border-radius:var(--r-lg);padding:15px;display:flex;flex-direction:column;gap:0;transition:box-shadow .2s}
-.bcard:hover{box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.bcard:hover{box-shadow:0 6px 24px rgba(0,0,0,.4),0 0 0 1px rgba(72,79,88,.7)}
 .bcard.success{border-left-color:var(--green)}
 .bcard.failed{border-left-color:var(--red);background:linear-gradient(135deg,var(--surface),rgba(248,81,73,.04))}
 .bcard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:11px}
@@ -112,8 +113,33 @@ main{padding:32px 0 16px}
 .snap{font-family:var(--mono);font-size:11px;color:var(--blue);background:var(--blue-bg);border-radius:var(--r-sm);padding:0 5px}
 
 /* === AGE ICON === */
-.age-icon{display:inline-flex;align-items:center;flex-shrink:0}
+.age-icon{display:inline-flex;align-items:center;flex-shrink:0;position:relative}
 .age-icon.fresh{color:var(--green)}.age-icon.aging{color:var(--amber)}.age-icon.stale{color:var(--red)}
+
+/* === COPY SNAP === */
+.snap-wrap{display:inline-flex;align-items:center;gap:2px}
+.snap-copy{background:none;border:none;padding:0 1px;cursor:pointer;color:var(--text-muted);opacity:0;transition:opacity .15s;line-height:0;display:inline-flex;align-items:center;flex-shrink:0}
+.snap-wrap:hover .snap-copy,.snap-copy.copied{opacity:1}
+.snap-copy.copied{color:var(--green)}
+
+/* === GLOBAL TOOLTIP === */
+.g-tip{position:fixed;z-index:500;background:#1c2128;border:1px solid var(--border);color:var(--text);font-size:11px;padding:4px 8px;border-radius:var(--r-sm);pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .15s;transform:translate(-50%,-100%)}
+.g-tip.visible{opacity:1}
+
+/* === COLLAPSIBLE OVERVIEW === */
+.sec-collapsible{cursor:pointer;user-select:none}
+.sec-collapsible:hover{color:var(--text)}
+.sec-collapsible::after{order:1}
+.sec-chev{order:2;flex-shrink:0;line-height:0;transition:transform .25s;transform:rotate(-90deg);margin-left:4px}
+.sec-chev.open{transform:rotate(0deg)}
+.overview-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s ease}
+.overview-body.collapsed{grid-template-rows:0fr}
+.overview-body-inner{min-height:0}
+
+/* === SNAP ROW CLICK === */
+.snap-table tr.snap-row{cursor:pointer}
+.snap-table tr.snap-row:hover td{background:rgba(88,166,255,.07)}
+.snap-table tr.snap-row.snap-latest:hover td{background:rgba(63,185,80,.1)}
 
 /* === TAGS === */
 .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid var(--surface-2)}

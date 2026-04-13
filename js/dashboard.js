@@ -21,6 +21,10 @@ function ageClass(iso){const h=(Date.now()-new Date(iso).getTime())/3600000;retu
 function formatLastRun(iso){const d=new Date(iso);const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())} ${mo[d.getMonth()]}`;}
 function totalSnapshots(bs){return bs.reduce((n,b)=>n+(b.snapshots||[]).length,0);}
 function mostRecentRun(bs){return bs.reduce((best,b)=>(!best||new Date(b.last_run)>new Date(best))?b.last_run:best,null);}
+function ageTooltip(iso){const mins=Math.floor((Date.now()-new Date(iso).getTime())/60000);if(mins<2)return 'Last backed up just now';if(mins<60)return `Last backed up ${mins} minute${mins===1?'':'s'} ago`;const hrs=Math.floor(mins/60);if(hrs<24)return `Last backed up ${hrs} hour${hrs===1?'':'s'} ago`;const days=Math.floor(hrs/24);return `Last backed up ${days} day${days===1?'':'s'} ago`;}
+function snapWithCopy(id){return `<span class="snap-wrap"><span class="snap">${esc(id)}</span><button class="snap-copy" onclick="copySnap(event,'${esc(id)}')">${IC.copy}</button></span>`;}
+function copyText(text,ok){if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(ok).catch(()=>fbCopy(text,ok));}else{fbCopy(text,ok);}}
+function fbCopy(text,ok){const t=Object.assign(document.createElement('textarea'),{value:text});Object.assign(t.style,{position:'fixed',opacity:'0'});document.body.appendChild(t);t.select();try{document.execCommand('copy');ok();}catch(e){}document.body.removeChild(t);}
 
 // ── COMMANDS ──────────────────────────────────────────────────────
 const NEEDS_SNAP=new Set(['restore-full','restore-temp','list-files']);
@@ -94,14 +98,14 @@ function buildCard(b,idx){
   const st=b.status==='success'?'success':'failed';
   const age=ageClass(b.last_run);
   const svcKey=b.name.includes('_')?b.name.slice(0,b.name.indexOf('_')):b.name;
-  const snapRows=(b.snapshots||[]).map(s=>`<tr${s.id===b.snapshot_id?' class="snap-latest"':''}><td><span class="snap">${esc(s.id)}</span></td><td>${esc(formatDate(s.time))}</td><td>${esc(formatSize(s.size_mb))}</td></tr>`).join('');
+  const snapRows=(b.snapshots||[]).map(s=>`<tr class="snap-row${s.id===b.snapshot_id?' snap-latest':''}" onclick="openModal(${idx},'${esc(s.id)}')">`+`<td>${snapWithCopy(s.id)}</td><td>${esc(formatDate(s.time))}</td><td>${esc(formatSize(s.size_mb))}</td></tr>`).join('');
   const snapCount=(b.snapshots||[]).length;
   const tagsHtml=b.contents?`<div class="tags">${b.contents.map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div>`:'';
   return `<div class="bcard ${st}">
   <div class="bcard-head"><div class="bcard-name-row"><span class="bcard-svc-icon">${SVCICONS[svcKey]||SVCICONS._default}</span><span class="bcard-name">${esc(name)}</span></div><div class="sbadge ${st}"><span class="sdot"></span>${st==='success'?'SUCCESS':'FAILED'}</div></div>
   <div class="bfields">
-    <div class="bfield"><span class="blbl">Last run</span><span class="bval">${esc(formatDate(b.last_run))}<span class="age-icon ${age}" title="${age}">${IC.clock}</span></span></div>
-    <div class="bfield"><span class="blbl">Snapshot</span><span class="bval"><span class="snap">${esc(b.snapshot_id)}</span></span></div>
+    <div class="bfield"><span class="blbl">Last run</span><span class="bval">${esc(formatDate(b.last_run))}<span class="age-icon ${age}" data-tip="${esc(ageTooltip(b.last_run))}">${IC.clock}</span></span></div>
+    <div class="bfield"><span class="blbl">Snapshot</span><span class="bval">${snapWithCopy(b.snapshot_id)}</span></div>
     <div class="bfield"><span class="blbl">Size</span><span class="bval">${esc(formatSize(b.size_mb))}</span></div>
   </div>
   ${tagsHtml}
@@ -124,7 +128,7 @@ function buildHeroCard(b,idx){
   const name=displayName(b.name,b.type);
   const st=b.status==='success'?'success':'failed';
   const age=ageClass(b.last_run);
-  const snapRows=(b.snapshots||[]).map(s=>`<tr${s.id===b.snapshot_id?' class="snap-latest"':''}><td><span class="snap">${esc(s.id)}</span></td><td>${esc(formatDate(s.time))}</td><td class="snap-size">${esc(formatSize(s.size_mb))}</td></tr>`).join('');
+  const snapRows=(b.snapshots||[]).map(s=>`<tr class="snap-row${s.id===b.snapshot_id?' snap-latest':''}" onclick="openModal(${idx},'${esc(s.id)}')">`+`<td>${snapWithCopy(s.id)}</td><td>${esc(formatDate(s.time))}</td><td class="snap-size">${esc(formatSize(s.size_mb))}</td></tr>`).join('');
   const tilesHtml=b.contents?b.contents.map(c=>`<div class="svc-tile"><div class="svc-tile-icon">${SVCICONS[c]||SVCICONS._default}</div><div class="svc-tile-name">${esc(c)}</div></div>`).join(''):'';
   return `<div class="hero-card ${st}">
   <div class="hero-hdr">
@@ -133,8 +137,8 @@ function buildHeroCard(b,idx){
       <div class="hero-sep"></div>
       <span class="sbadge ${st}"><span class="sdot"></span>${st==='success'?'SUCCESS':'FAILED'}</span>
       <div class="hero-sep"></div>
-      <span class="age-icon ${age}">${IC.clock}</span>
-      <span class="snap">${esc(b.snapshot_id)}</span>
+      <span class="age-icon ${age}" data-tip="${esc(ageTooltip(b.last_run))}">${IC.clock}</span>
+      ${snapWithCopy(b.snapshot_id)}
       <span style="font-size:12px;color:var(--text-muted)">${esc(formatSize(b.size_mb))}</span>
     </div>
     <button class="cmd-btn" style="width:auto;flex-shrink:0" onclick="openModal(${idx})">${IC.term} Generate Command</button>
@@ -169,6 +173,7 @@ function render(data){
   const statusCls=anyFailed?'sc-red':'sc-green';
   const totalSnaps=totalSnapshots(_backups);
   const lastRun=mostRecentRun(_backups);
+  const overviewCollapsed=localStorage.getItem('overview-collapsed')==='1';
 
   document.getElementById('app').innerHTML=`
 <header class="hdr"><div class="wrap"><div class="hdr-row">
@@ -185,7 +190,8 @@ function render(data){
 <main><div class="wrap">
 
 <div class="section">
-  <div class="sec-label">Overview</div>
+  <div class="sec-label sec-collapsible" onclick="toggleOverview()">Overview<span id="overview-chev" class="sec-chev${overviewCollapsed?'':' open'}">${IC.chevron}</span></div>
+  <div id="overview-body" class="overview-body${overviewCollapsed?' collapsed':''}"><div class="overview-body-inner">
   <div class="stat-grid">
     <div class="scard ${statusCls}"><div class="scard-icon">${IC.ic_shield}</div><div class="scard-val">${esc(statusVal)}</div><div class="scard-lbl">Backup Status</div></div>
     <div class="scard sc-blue"><div class="scard-icon">${IC.ic_database}</div><div class="scard-val">${_backups.length}</div><div class="scard-lbl">Backups Monitored</div></div>
@@ -200,6 +206,7 @@ function render(data){
     </div>
     <div class="stor-total">${repo.drive_total_gb} GB total</div>
   </div>
+  </div></div>
 </div>
 
 <div class="section">
@@ -258,13 +265,14 @@ function toggleHistory(idx){
 }
 
 // ── MODAL ─────────────────────────────────────────────────────────
-function openModal(idx){
+function openModal(idx,snapId){
   const b=_backups[idx];
   if(!b)return;
   document.getElementById('modal-title').textContent=displayName(b.name,b.type);
   document.getElementById('modal-act').value='restore-full';
   const snapSel=document.getElementById('modal-snap');
   snapSel.innerHTML=(b.snapshots||[{id:b.snapshot_id,time:b.last_run,size_mb:b.size_mb}]).map(s=>`<option value="${esc(s.id)}">${esc(s.id)} \u2014 ${esc(formatDate(s.time))} \u2014 ${esc(formatSize(s.size_mb))}</option>`).join('');
+  if(snapId)snapSel.value=snapId;
   const copyBtn=document.getElementById('modal-copy');
   copyBtn.className='copy-btn';
   copyBtn.innerHTML=IC.copy+' Copy';
@@ -289,8 +297,30 @@ function updateModalCmd(){
 function modalCopy(){
   const btn=document.getElementById('modal-copy');
   const ok=()=>{btn.className='copy-btn copied';btn.innerHTML=IC.check+' Copied!';setTimeout(()=>{btn.className='copy-btn';btn.innerHTML=IC.copy+' Copy';},2000);};
-  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(_modalCmd).then(ok).catch(fb);}else{fb();}
-  function fb(){const t=Object.assign(document.createElement('textarea'),{value:_modalCmd});Object.assign(t.style,{position:'fixed',opacity:'0'});document.body.appendChild(t);t.select();try{document.execCommand('copy');ok();}catch(e){}document.body.removeChild(t);}
+  copyText(_modalCmd,ok);
+}
+function copySnap(e,id){
+  e.stopPropagation();
+  const btn=e.currentTarget;
+  const ok=()=>{btn.innerHTML=IC.check;btn.classList.add('copied');setTimeout(()=>{btn.innerHTML=IC.copy;btn.classList.remove('copied');},1000);};
+  copyText(id,ok);
+}
+function toggleOverview(){
+  const body=document.getElementById('overview-body');
+  const chev=document.getElementById('overview-chev');
+  const nowCollapsed=body.classList.toggle('collapsed');
+  chev.classList.toggle('open',!nowCollapsed);
+  localStorage.setItem('overview-collapsed',nowCollapsed?'1':'0');
+}
+function initTooltip(){
+  const tip=document.createElement('div');
+  tip.id='g-tip';tip.className='g-tip';
+  document.body.appendChild(tip);
+  document.addEventListener('mouseover',e=>{
+    const el=e.target.closest('[data-tip]');
+    if(el){tip.textContent=el.dataset.tip;const r=el.getBoundingClientRect();tip.style.left=(r.left+r.width/2)+'px';tip.style.top=(r.top-8)+'px';tip.classList.add('visible');}
+    else{tip.classList.remove('visible');}
+  });
 }
 
 // ── ESCAPE KEY CLOSES MODAL ───────────────────────────────────────
@@ -303,4 +333,7 @@ window.closeModal=closeModal;
 window.onOverlayClick=onOverlayClick;
 window.updateModalCmd=updateModalCmd;
 window.modalCopy=modalCopy;
+window.copySnap=copySnap;
+window.toggleOverview=toggleOverview;
+initTooltip();
 loadData().then(render);
