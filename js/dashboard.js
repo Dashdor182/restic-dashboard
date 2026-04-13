@@ -105,27 +105,30 @@ function buildHeroCard(b,idx){
   const name=displayName(b.name,b.type);
   const st=b.status==='success'?'success':'failed';
   const age=ageClass(b.last_run);
-  const snapRows=(b.snapshots||[]).map(s=>`<tr${s.id===b.snapshot_id?' class="snap-latest"':''}><td><span class="snap">${esc(s.id)}</span></td><td>${esc(formatDate(s.time))}</td><td>${esc(formatSize(s.size_mb))}</td></tr>`).join('');
-  const tagsHtml=b.contents?b.contents.map(c=>`<span class="tag">${esc(c)}</span>`).join(''):'';
+  const snapRows=(b.snapshots||[]).map(s=>`<tr${s.id===b.snapshot_id?' class="snap-latest"':''}><td><span class="snap">${esc(s.id)}</span></td><td>${esc(formatDate(s.time))}</td><td class="snap-size">${esc(formatSize(s.size_mb))}</td></tr>`).join('');
+  const tagsHtml=b.contents?b.contents.map(c=>`<span class="hero-tag">${esc(c)}</span>`).join(''):'';
   return `<div class="hero-card ${st}">
-  <div class="hero-title-row">
-    <div class="hero-name">${esc(name)}</div>
-    <div class="hero-badges"><span class="hero-type-chip">FILES BACKUP</span><span class="sbadge ${st}"><span class="sdot"></span>${st==='success'?'SUCCESS':'FAILED'}</span></div>
-  </div>
-  <div class="hero-body">
-    <div class="hero-left">
-      <div class="bfields">
-        <div class="bfield"><span class="blbl">Last run</span><span class="bval">${esc(formatDate(b.last_run))}<span class="age-icon ${age}">${IC.clock}</span></span></div>
-        <div class="bfield"><span class="blbl">Snapshot</span><span class="bval"><span class="snap">${esc(b.snapshot_id)}</span></span></div>
-        <div class="bfield"><span class="blbl">Size</span><span class="bval">${esc(formatSize(b.size_mb))}</span></div>
-      </div>
-      <div class="tags" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--surface-2)">${tagsHtml}</div>
-      <div class="bcard-footer"><button class="cmd-btn" onclick="openModal(${idx})">${IC.term} Generate Command</button></div>
+  <div class="hero-hdr">
+    <div class="hero-hdr-left">
+      <span class="hero-name">${esc(name)}</span>
+      <div class="hero-sep"></div>
+      <span class="sbadge ${st}"><span class="sdot"></span>${st==='success'?'SUCCESS':'FAILED'}</span>
+      <div class="hero-sep"></div>
+      <span class="age-icon ${age}">${IC.clock}</span>
+      <span class="snap">${esc(b.snapshot_id)}</span>
+      <span style="font-size:12px;color:var(--text-muted)">${esc(formatSize(b.size_mb))}</span>
     </div>
-    <div class="hero-right">
-      <div class="snap-section-lbl">Snapshot History</div>
+    <button class="cmd-btn" style="width:auto;flex-shrink:0" onclick="openModal(${idx})">${IC.term} Generate Command</button>
+  </div>
+  <div class="hero-panels">
+    <div class="hero-panel">
+      <div class="panel-lbl">Included Stacks</div>
+      <div class="hero-tags">${tagsHtml}</div>
+    </div>
+    <div class="hero-panel">
+      <div class="panel-lbl">Snapshot History</div>
       <table class="snap-table">
-        <thead><tr><th>ID</th><th>Date / Time</th><th>Size</th></tr></thead>
+        <thead><tr><th>ID</th><th>Date / Time</th><th class="snap-size">Size</th></tr></thead>
         <tbody>${snapRows}</tbody>
       </table>
     </div>
