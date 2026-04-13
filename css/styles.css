@@ -77,8 +77,10 @@ main{padding:32px 0 16px}
 .hero-panel{padding:16px 20px}
 .hero-panel+.hero-panel{border-left:1px solid var(--border)}
 .panel-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:10px}
-.hero-tags{display:flex;flex-wrap:wrap;gap:6px}
-.hero-tag{font-size:11px;font-weight:500;background:var(--blue-bg);border:1px solid var(--blue-bd);color:var(--blue);padding:5px 13px;border-radius:100px;letter-spacing:.2px}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px}
+.svc-tile{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.svc-tile-icon{color:var(--blue);line-height:0}
+.svc-tile-name{font-size:10px;color:var(--text-muted);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;text-align:center;letter-spacing:.2px}
 .snap-table .snap-size{text-align:right}
 @media(max-width:800px){.hero-panels{grid-template-columns:1fr}.hero-panel+.hero-panel{border-left:none;border-top:1px solid var(--border)}}
 
