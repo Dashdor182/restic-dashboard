@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backup Status</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface-2:#21262d;--surface-3:#2d333b;
+  --border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--text-bright:#f0f6fc;
+  --green:#3fb950;--green-bg:rgba(63,185,80,.1);--green-bd:rgba(63,185,80,.3);
+  --blue:#58a6ff;--blue-bg:rgba(88,166,255,.1);--blue-bd:rgba(88,166,255,.3);
+  --amber:#e3b341;--amber-bg:rgba(227,179,65,.1);--amber-bd:rgba(227,179,65,.3);
+  --red:#f85149;--red-bg:rgba(248,81,73,.1);--red-bd:rgba(248,81,73,.3);
+  --mono:'JetBrains Mono','Fira Code',Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --r:8px;--r-sm:4px;--r-lg:12px
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* HEADER */
+.hdr{background:linear-gradient(160deg,#1c2128,#161b22);border-bottom:1px solid var(--border);padding:20px 0}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:42px;height:42px;background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--blue);flex-shrink:0}
+.brand-text h1{font-size:19px;font-weight:700;color:var(--text-bright);letter-spacing:-.3px}
+.brand-sub{font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-top:1px}
+.hdr-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.health-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:100px;font-size:12px;font-weight:600;letter-spacing:.3px}
+.health-badge.healthy{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green)}
+.health-badge.warning{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber)}
+.health-badge.critical{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red)}
+.hdot{width:7px;height:7px;border-radius:50%;animation:blink 2s ease-in-out infinite}
+.healthy .hdot{background:var(--green)}.warning .hdot{background:var(--amber)}.critical .hdot{background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.last-upd{font-size:11px;color:var(--text-muted)}
+.last-upd b{font-family:var(--mono);color:var(--text);font-weight:400}
+
+/* MAIN */
+main{padding:32px 0 16px}
+.section{margin-bottom:36px}
+.sec-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* STORAGE */
+.stor-card{background:linear-gradient(135deg,var(--surface),#1a2030);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 24px}
+.stor-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.stor-name{font-size:14px;font-weight:600;color:var(--text-bright);display:flex;align-items:center;gap:8px}
+.stor-pct{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--text-bright)}
+.bar-track{height:10px;background:var(--surface-2);border-radius:100px;overflow:hidden;margin-bottom:14px}
+.bar-fill{height:100%;border-radius:100px;position:relative;transition:width .8s ease;min-width:2px}
+.bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,.18) 65%,transparent 100%)}
+.stor-stats{display:flex;gap:28px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;gap:1px}
+.stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)}
+.stat-val{font-family:var(--mono);font-size:17px;font-weight:700}
+.stat-val.used{color:var(--blue)}.stat-val.free{color:var(--green)}.stat-val.total{color:var(--text-bright)}
+
+/* BACKUP GRID */
+.sub-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sub-title{font-size:13px;font-weight:600;color:var(--text)}
+.chip{font-size:10px;font-weight:500;background:var(--surface-2);border:1px solid var(--border);border-radius:100px;padding:1px 8px;color:var(--text-muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+
+/* BACKUP CARD */
+.bcard{background:var(--surface);border:1px solid var(--border);border-left:3px solid transparent;border-radius:var(--r-lg);padding:15px;transition:box-shadow .2s}
+.bcard:hover{box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.bcard.success{border-left-color:var(--green)}
+.bcard.failed{border-left-color:var(--red);background:linear-gradient(135deg,var(--surface),rgba(248,81,73,.04))}
+.bcard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:11px}
+.bcard-name{font-size:13px;font-weight:600;color:var(--text-bright);line-height:1.3;word-break:break-word}
+.sbadge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.6px;white-space:nowrap;flex-shrink:0}
+.sbadge.success{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green)}
+.sbadge.failed{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red)}
+.sdot{width:5px;height:5px;border-radius:50%}
+.sbadge.success .sdot{background:var(--green)}.sbadge.failed .sdot{background:var(--red)}
+.bfields{display:flex;flex-direction:column;gap:5px}
+.bfield{display:flex;gap:8px;font-size:12px;line-height:1.4}
+.blbl{color:var(--text-muted);min-width:62px;flex-shrink:0;font-size:10px;text-transform:uppercase;letter-spacing:.4px;padding-top:1px}
+.bval{color:var(--text)}
+.snap{font-family:var(--mono);font-size:11px;color:var(--blue);background:var(--blue-bg);border-radius:var(--r-sm);padding:0 5px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid var(--surface-2)}
+.tag{font-size:10px;font-weight:500;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:2px 7px;color:var(--text-muted)}
+
+/* COMMAND GENERATOR */
+.cmd-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.cmd-head{padding:14px 20px;background:linear-gradient(135deg,#1e2430,var(--surface));border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.cmd-head-title{font-size:14px;font-weight:600;color:var(--text-bright)}
+.cmd-body{padding:20px}
+.cmd-controls{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.ctrl-grp{display:flex;flex-direction:column;gap:5px}
+.ctrl-lbl{font-size:11px;color:var(--text-muted);font-weight:500;letter-spacing:.3px}
+.ctrl-sel{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:8px 32px 8px 12px;font-size:13px;font-family:var(--sans);cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238b949e' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 10px center;background-size:16px;width:100%;transition:border-color .15s}
+.ctrl-sel:focus{outline:none;border-color:var(--blue-bd);box-shadow:0 0 0 2px rgba(88,166,255,.15)}
+.ctrl-sel:disabled{opacity:.35;cursor:not-allowed}
+.cmd-out{background:#0d1117;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.cmd-out-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:#1c2128;border-bottom:1px solid var(--border)}
+.cmd-out-lbl{font-family:var(--mono);font-size:11px;color:var(--text-muted)}
+.copy-btn{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:none;border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-muted);font-size:11px;font-family:var(--sans);cursor:pointer;transition:all .15s}
+.copy-btn:hover{border-color:var(--blue-bd);color:var(--blue);background:var(--blue-bg)}
+.copy-btn.copied{border-color:var(--green-bd);color:var(--green);background:var(--green-bg)}
+.cmd-code{padding:16px;font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap;word-break:break-all;min-height:56px}
+.t-sudo{color:#f85149}.t-cmd{color:#58a6ff}.t-flag{color:#e3b341}.t-path{color:#a5d6ff}.t-snap{color:#e3b341;font-weight:600}.t-act{color:#3fb950}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:20px 0;text-align:center;color:var(--text-muted);font-size:11px;margin-top:8px}
+footer code{font-size:10px;color:var(--text);font-family:var(--mono)}
+
+/* RESPONSIVE */
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:580px){
+  .grid{grid-template-columns:1fr}
+  .hdr-row{flex-direction:column;align-items:flex-start}
+  .hdr-meta{align-items:flex-start}
+  .stor-top{flex-direction:column;align-items:flex-start;gap:4px}
+  .cmd-controls{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="app"><div style="display:flex;align-items:center;justify-content:center;min-height:100vh;color:var(--text-muted)">Loading…</div></div>
+<script>
+'use strict';
+
+// ===================================================================
+// SAMPLE DATA — embedded for offline/dev use
+// In production, the fetch() below loads /status.json instead
+// ===================================================================
+const SAMPLE_DATA = {"last_updated":"2026-04-13T12:42:33+00:00","repository":{"path":"/mnt/backup/restic","drive_total_gb":15,"drive_used_gb":2,"drive_free_gb":12,"drive_percent_used":12},"backups":[{"name":"srv-docker","type":"files","path":"/srv/docker","contents":["arcane","bentopdf","dockge","dozzle","gitea","homarr","it-tools","mealie","npm","pihole","uptime-kuma","vpn","wud"],"last_run":"2026-04-13T12:32:24+00:00","status":"success","snapshot_id":"19c3a21b","size_mb":10},{"name":"arcane_arcane-data","type":"volume","path":"/var/lib/docker/volumes/arcane_arcane-data/_data","last_run":"2026-04-13T12:42:25+00:00","status":"success","snapshot_id":"8d3efb44","size_mb":0},{"name":"uptime-kuma_uptime-kuma-data","type":"volume","path":"/var/lib/docker/volumes/uptime-kuma_uptime-kuma-data/_data","last_run":"2026-04-13T12:42:26+00:00","status":"success","snapshot_id":"eefc6ed0","size_mb":11},{"name":"npm_npm-data","type":"volume","path":"/var/lib/docker/volumes/npm_npm-data/_data","last_run":"2026-04-13T12:42:27+00:00","status":"success","snapshot_id":"b268d52f","size_mb":7},{"name":"npm_npm-letsencrypt","type":"volume","path":"/var/lib/docker/volumes/npm_npm-letsencrypt/_data","last_run":"2026-04-13T12:42:29+00:00","status":"success","snapshot_id":"a949821c","size_mb":0},{"name":"mealie_mealie-data","type":"volume","path":"/var/lib/docker/volumes/mealie_mealie-data/_data","last_run":"2026-04-13T12:42:29+00:00","status":"success","snapshot_id":"a311480d","size_mb":0}]};
+
+// ===================================================================
+// DATA LOADING
+// ===================================================================
+async function loadData() {
+  try {
+    const res = await fetch('/status.json');
+    if (!res.ok) throw new Error('fetch failed');
+    return await res.json();
+  } catch {
+    return SAMPLE_DATA;
+  }
+}
+
+// ===================================================================
+// HELPERS
+// ===================================================================
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function cleanName(name, type) {
+  if (type === 'volume') {
+    const idx = name.indexOf('_');
+    let s = idx !== -1 ? name.slice(idx + 1) : name;
+    return s.replace(/-data$/, '');
+  }
+  return name;
+}
+
+function displayName(name, type) {
+  const s = cleanName(name, type);
+  return s.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2,'0');
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${pad(d.getDate())} ${mo[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function getHealth(backups) {
+  if (backups.some(b => b.status !== 'success')) return 'critical';
+  const maxAge = 25 * 3600 * 1000;
+  if (backups.some(b => Date.now() - new Date(b.last_run).getTime() > maxAge)) return 'warning';
+  return 'healthy';
+}
+
+function healthLabel(h) {
+  return {healthy:'All Systems Healthy', warning:'Backups Stale', critical:'Backup Failure'}[h];
+}
+
+const NEEDS_SNAP = new Set(['restore-full','restore-temp','list-files']);
+
+function generateCmd(snapId, action) {
+  const base = 'sudo restic -r /mnt/backup/restic --password-file /etc/restic-password';
+  const map = {
+    'restore-full': `${base} restore ${snapId} --target /`,
+    'restore-temp': `${base} restore ${snapId} --target /tmp/restic-restore`,
+    'list-files':   `${base} ls ${snapId}`,
+    'prune':        `${base} forget --keep-daily 7 --prune`,
+    'rebuild':      `${base} rebuild-index`,
+    'unlock':       `${base} unlock`
+  };
+  return map[action] || '';
+}
+
+function highlight(cmd) {
+  const actions = new Set(['restore','ls','forget','rebuild-index','unlock']);
+  return cmd.split(' ').map(t => {
+    if (t === 'sudo')              return `<span class="t-sudo">${t}</span>`;
+    if (t === 'restic')            return `<span class="t-cmd">${t}</span>`;
+    if (t.startsWith('--') || (t.startsWith('-') && t.length > 1 && t[1] !== '/'))
+                                   return `<span class="t-flag">${t}</span>`;
+    if (/^[a-f0-9]{8}$/.test(t))  return `<span class="t-snap">${t}</span>`;
+    if (t.startsWith('/'))         return `<span class="t-path">${t}</span>`;
+    if (actions.has(t))            return `<span class="t-act">${t}</span>`;
+    return t;
+  }).join(' ');
+}
+
+// ===================================================================
+// SVG ICONS
+// ===================================================================
+const SVG = {
+  server: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="6" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>`,
+  disk:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>`,
+  term:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
+  copy:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`,
+  check:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  folder: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>`,
+  box:    `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`
+};
+
+// ===================================================================
+// CARD BUILDER
+// ===================================================================
+function buildCard(b) {
+  const name = displayName(b.name, b.type);
+  const st   = b.status === 'success' ? 'success' : 'failed';
+  const size = b.size_mb > 0 ? `${b.size_mb} MB` : '< 1 MB';
+  const tagsHtml = b.contents
+    ? `<div class="tags">${b.contents.map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div>`
+    : '';
+  return `
+<div class="bcard ${st}">
+  <div class="bcard-head">
+    <div class="bcard-name">${esc(name)}</div>
+    <div class="sbadge ${st}"><span class="sdot"></span>${st === 'success' ? 'SUCCESS' : 'FAILED'}</div>
+  </div>
+  <div class="bfields">
+    <div class="bfield"><span class="blbl">Last run</span><span class="bval">${esc(formatDate(b.last_run))}</span></div>
+    <div class="bfield"><span class="blbl">Snapshot</span><span class="bval"><span class="snap">${esc(b.snapshot_id)}</span></span></div>
+    <div class="bfield"><span class="blbl">Size</span><span class="bval">${size}</span></div>
+  </div>
+  ${tagsHtml}
+</div>`;
+}
+
+// ===================================================================
+// RENDER
+// ===================================================================
+function render(data) {
+  const { repository: repo, backups, last_updated } = data;
+  const health = getHealth(backups);
+  const files  = backups.filter(b => b.type === 'files');
+  const vols   = backups.filter(b => b.type === 'volume');
+  const pct    = repo.drive_percent_used;
+  const barCol = pct < 60 ? 'var(--green)' : pct < 80 ? 'var(--amber)' : 'var(--red)';
+
+  const srcOpts = backups.map(b =>
+    `<option value="${esc(b.snapshot_id)}">${esc(displayName(b.name,b.type))} — ${esc(b.snapshot_id)}</option>`
+  ).join('');
+
+  document.getElementById('app').innerHTML = `
+<header class="hdr">
+  <div class="wrap">
+    <div class="hdr-row">
+      <div class="hdr-brand">
+        <div class="brand-icon">${SVG.server}</div>
+        <div class="brand-text">
+          <h1>Backup Status</h1>
+          <div class="brand-sub">homeserver &nbsp;·&nbsp; /mnt/backup/restic</div>
+        </div>
+      </div>
+      <div class="hdr-meta">
+        <div class="health-badge ${health}"><span class="hdot"></span>${healthLabel(health)}</div>
+        <div class="last-upd">Updated <b>${esc(formatDate(last_updated))}</b></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+  <div class="section">
+    <div class="sec-label">Backup Drive</div>
+    <div class="stor-card">
+      <div class="stor-top">
+        <div class="stor-name" style="color:var(--blue)">${SVG.disk}&nbsp;<span style="color:var(--text-bright)">${esc(repo.path)}</span></div>
+        <div class="stor-pct">${pct}%</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="bar" style="width:${pct}%;background:${barCol}"></div></div>
+      <div class="stor-stats">
+        <div class="stat"><span class="stat-lbl">Used</span><span class="stat-val used">${repo.drive_used_gb} GB</span></div>
+        <div class="stat"><span class="stat-lbl">Free</span><span class="stat-val free">${repo.drive_free_gb} GB</span></div>
+        <div class="stat"><span class="stat-lbl">Total</span><span class="stat-val total">${repo.drive_total_gb} GB</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">Backups</div>
+
+    <div class="sub-hdr">
+      <span style="color:var(--blue)">${SVG.folder}</span>
+      <span class="sub-title">Configuration Files</span>
+      <span class="chip">${files.length}</span>
+    </div>
+    <div class="grid">${files.map(buildCard).join('')}</div>
+
+    <div class="sub-hdr">
+      <span style="color:var(--amber)">${SVG.box}</span>
+      <span class="sub-title">Docker Volumes</span>
+      <span class="chip">${vols.length}</span>
+    </div>
+    <div class="grid">${vols.map(buildCard).join('')}</div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">Generate Command</div>
+    <div class="cmd-card">
+      <div class="cmd-head">
+        <span style="color:var(--amber)">${SVG.term}</span>
+        <span class="cmd-head-title">Generate Command</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-controls">
+          <div class="ctrl-grp">
+            <label class="ctrl-lbl" for="sel-src">Step 1 — Backup Source</label>
+            <select class="ctrl-sel" id="sel-src">${srcOpts}</select>
+          </div>
+          <div class="ctrl-grp">
+            <label class="ctrl-lbl" for="sel-act">Step 2 — Action</label>
+            <select class="ctrl-sel" id="sel-act">
+              <option value="restore-full">Restore full snapshot to original location</option>
+              <option value="restore-temp">Restore to temporary location for inspection</option>
+              <option value="list-files">List files in snapshot</option>
+              <option value="prune">Prune old snapshots</option>
+              <option value="rebuild">Rebuild repository index</option>
+              <option value="unlock">Unlock repository</option>
+            </select>
+          </div>
+        </div>
+        <div class="cmd-out">
+          <div class="cmd-out-bar">
+            <span class="cmd-out-lbl">bash</span>
+            <button class="copy-btn" id="copy-btn">${SVG.copy} Copy</button>
+          </div>
+          <div class="cmd-code" id="cmd-out"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">Restic Backup Dashboard &nbsp;·&nbsp; Data from <code>/var/lib/restic-status.json</code></div>
+</footer>`;
+
+  updateCmd();
+  document.getElementById('sel-src').addEventListener('change', updateCmd);
+  document.getElementById('sel-act').addEventListener('change', updateCmd);
+  document.getElementById('copy-btn').addEventListener('click', copyCmd);
+}
+
+// ===================================================================
+// COMMAND GENERATOR
+// ===================================================================
+function updateCmd() {
+  const action = document.getElementById('sel-act').value;
+  const snapId = document.getElementById('sel-src').value;
+  const srcSel = document.getElementById('sel-src');
+  srcSel.disabled = !NEEDS_SNAP.has(action);
+  const cmd = generateCmd(snapId, action);
+  document.getElementById('cmd-out').innerHTML = highlight(cmd);
+  const btn = document.getElementById('copy-btn');
+  btn.className = 'copy-btn';
+  btn.innerHTML = `${SVG.copy} Copy`;
+}
+
+function copyCmd() {
+  const action = document.getElementById('sel-act').value;
+  const snapId = document.getElementById('sel-src').value;
+  const cmd    = generateCmd(snapId, action);
+  const btn    = document.getElementById('copy-btn');
+  const succeed = () => {
+    btn.className = 'copy-btn copied';
+    btn.innerHTML = `${SVG.check} Copied!`;
+    setTimeout(() => { btn.className='copy-btn'; btn.innerHTML=`${SVG.copy} Copy`; }, 2000);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(cmd).then(succeed).catch(fallback);
+  } else { fallback(); }
+  function fallback() {
+    const ta = Object.assign(document.createElement('textarea'), {value:cmd});
+    Object.assign(ta.style, {position:'fixed',opacity:'0'});
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); succeed(); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+}
+
+// ===================================================================
+// INIT
+// ===================================================================
+loadData().then(render);
+</script>
+</body>
+</html>
