@@ -67,15 +67,20 @@ main{padding:32px 0 16px}
 .stor-total{font-family:var(--mono);font-size:11px;color:var(--text-muted);text-align:center}
 
 /* === HERO CARD (files backup) === */
-.hero-card{background:linear-gradient(135deg,var(--surface),#161e2e);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r-lg);padding:22px 24px;margin-bottom:20px}
+.hero-card{background:linear-gradient(135deg,var(--surface),#161e2e);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r-lg);overflow:hidden;margin-bottom:20px}
 .hero-card.failed{border-left-color:var(--red)}
-.hero-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-.hero-name{font-size:16px;font-weight:700;color:var(--text-bright)}
-.hero-badges{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.hero-type-chip{font-size:10px;font-weight:600;background:var(--blue-bg);border:1px solid var(--blue-bd);color:var(--blue);padding:2px 10px;border-radius:100px;letter-spacing:.5px}
-.hero-body{display:grid;grid-template-columns:320px 1fr;gap:28px;align-items:start}
-.hero-right .snap-section-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px}
-@media(max-width:900px){.hero-body{grid-template-columns:1fr}}
+.hero-hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 18px;background:rgba(0,0,0,.22);border-bottom:1px solid var(--border)}
+.hero-hdr-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;min-width:0}
+.hero-name{font-size:14px;font-weight:700;color:var(--text-bright);white-space:nowrap}
+.hero-sep{width:1px;height:13px;background:var(--border);flex-shrink:0}
+.hero-panels{display:grid;grid-template-columns:1fr 1fr}
+.hero-panel{padding:16px 20px}
+.hero-panel+.hero-panel{border-left:1px solid var(--border)}
+.panel-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:10px}
+.hero-tags{display:flex;flex-wrap:wrap;gap:6px}
+.hero-tag{font-size:11px;font-weight:500;background:var(--blue-bg);border:1px solid var(--blue-bd);color:var(--blue);padding:5px 13px;border-radius:100px;letter-spacing:.2px}
+.snap-table .snap-size{text-align:right}
+@media(max-width:800px){.hero-panels{grid-template-columns:1fr}.hero-panel+.hero-panel{border-left:none;border-top:1px solid var(--border)}}
 
 /* === BACKUP GRID === */
 .sub-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px}
