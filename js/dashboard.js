@@ -58,7 +58,11 @@ const IC={
   check:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
   folder:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>`,
   box:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`,
-  chevron:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`
+  chevron:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+  ic_shield:`<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`,
+  ic_database:`<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/></svg>`,
+  ic_clock:`<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  ic_layers:`<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`
 };
 
 // ── MODULE STATE ──────────────────────────────────────────────────
@@ -138,7 +142,6 @@ function render(data){
   const vols=_backups.filter(b=>b.type==='volume');
   const pct=repo.drive_percent_used;
   const barCol=pct<60?'var(--green)':pct<80?'var(--amber)':'var(--red)';
-  const pctCol=pct<60?'var(--green)':pct<80?'var(--amber)':'var(--red)';
   const anyFailed=_backups.some(b=>b.status!=='success');
   const statusVal=anyFailed?`${_backups.filter(b=>b.status!=='success').length} Failed`:'All Healthy';
   const statusCls=anyFailed?'sc-red':'sc-green';
@@ -162,24 +165,18 @@ function render(data){
 <div class="section">
   <div class="sec-label">Overview</div>
   <div class="stat-grid">
-    <div class="scard ${statusCls}"><div class="scard-val">${esc(statusVal)}</div><div class="scard-lbl">Backup Status</div></div>
-    <div class="scard sc-blue"><div class="scard-val">${_backups.length}</div><div class="scard-lbl">Backups Monitored</div></div>
-    <div class="scard sc-amber"><div class="scard-val">${esc(formatLastRun(lastRun))}</div><div class="scard-lbl">Last Backup Run</div></div>
-    <div class="scard sc-purple"><div class="scard-val">${totalSnaps}</div><div class="scard-lbl">Total Snapshots</div></div>
+    <div class="scard ${statusCls}"><div class="scard-icon">${IC.ic_shield}</div><div class="scard-val">${esc(statusVal)}</div><div class="scard-lbl">Backup Status</div></div>
+    <div class="scard sc-blue"><div class="scard-icon">${IC.ic_database}</div><div class="scard-val">${_backups.length}</div><div class="scard-lbl">Backups Monitored</div></div>
+    <div class="scard sc-amber"><div class="scard-icon">${IC.ic_clock}</div><div class="scard-val">${esc(formatLastRun(lastRun))}</div><div class="scard-lbl">Last Backup Run</div></div>
+    <div class="scard sc-purple"><div class="scard-icon">${IC.ic_layers}</div><div class="scard-val">${totalSnaps}</div><div class="scard-lbl">Total Snapshots</div></div>
   </div>
   <div class="stor-card">
     <div class="stor-path-row"><span style="color:var(--blue)">${IC.disk}</span>${esc(repo.path)}</div>
-    <div class="stor-bar-row">
-      <div class="stor-bar-col">
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${barCol}"></div></div>
-      </div>
-      <div class="stor-pct" style="color:${pctCol}">${pct}%</div>
+    <div class="seg-bar">
+      <div class="seg-used" style="width:${pct}%;background:${barCol}"><span class="seg-lbl">${repo.drive_used_gb} GB USED</span></div>
+      <div class="seg-free"><span class="seg-lbl">${repo.drive_free_gb} GB FREE</span></div>
     </div>
-    <div class="stor-stats">
-      <div class="stat-box"><div class="stat-lbl">Used</div><div class="stat-val used">${repo.drive_used_gb} GB</div></div>
-      <div class="stat-box"><div class="stat-lbl">Free</div><div class="stat-val free">${repo.drive_free_gb} GB</div></div>
-      <div class="stat-box"><div class="stat-lbl">Total</div><div class="stat-val total">${repo.drive_total_gb} GB</div></div>
-    </div>
+    <div class="stor-total">${repo.drive_total_gb} GB total</div>
   </div>
 </div>
 
