@@ -14,6 +14,7 @@
   --blue:#58a6ff;--blue-bg:rgba(88,166,255,.1);--blue-bd:rgba(88,166,255,.3);
   --amber:#e3b341;--amber-bg:rgba(227,179,65,.1);--amber-bd:rgba(227,179,65,.3);
   --red:#f85149;--red-bg:rgba(248,81,73,.1);--red-bd:rgba(248,81,73,.3);
+  --purple:#a371f7;--purple-bg:rgba(163,113,247,.1);--purple-bd:rgba(163,113,247,.3);
   --mono:'JetBrains Mono','Fira Code',Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
   --r:8px;--r-sm:4px;--r-lg:12px
@@ -45,6 +46,17 @@ main{padding:32px 0 16px}
 .sec-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin-bottom:14px;display:flex;align-items:center;gap:10px}
 .sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
 
+/* === OVERVIEW STAT CARDS === */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+.scard{border-radius:var(--r-lg);padding:20px 22px;border:1px solid}
+.scard-val{font-family:var(--mono);font-size:22px;font-weight:700;margin-bottom:4px;line-height:1.2;word-break:break-word}
+.scard-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;opacity:.7}
+.scard.sc-green{background:var(--green-bg);border-color:var(--green-bd);color:var(--green)}
+.scard.sc-red{background:var(--red-bg);border-color:var(--red-bd);color:var(--red)}
+.scard.sc-blue{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+.scard.sc-amber{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber)}
+.scard.sc-purple{background:var(--purple-bg);border-color:var(--purple-bd);color:var(--purple)}
+
 /* === STORAGE HERO === */
 .stor-card{background:linear-gradient(135deg,var(--surface),#151e2e);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px 32px}
 .stor-path-row{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-bottom:22px;display:flex;align-items:center;gap:7px}
@@ -59,6 +71,17 @@ main{padding:32px 0 16px}
 .stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:4px}
 .stat-val{font-family:var(--mono);font-size:26px;font-weight:700}
 .stat-val.used{color:var(--blue)}.stat-val.free{color:var(--green)}.stat-val.total{color:var(--text-bright)}
+
+/* === HERO CARD (files backup) === */
+.hero-card{background:linear-gradient(135deg,var(--surface),#161e2e);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r-lg);padding:22px 24px;margin-bottom:20px}
+.hero-card.failed{border-left-color:var(--red)}
+.hero-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.hero-name{font-size:16px;font-weight:700;color:var(--text-bright)}
+.hero-badges{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.hero-type-chip{font-size:10px;font-weight:600;background:var(--blue-bg);border:1px solid var(--blue-bd);color:var(--blue);padding:2px 10px;border-radius:100px;letter-spacing:.5px}
+.hero-body{display:grid;grid-template-columns:320px 1fr;gap:28px;align-items:start}
+.hero-right .snap-section-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px}
+@media(max-width:900px){.hero-body{grid-template-columns:1fr}}
 
 /* === BACKUP GRID === */
 .sub-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px}
@@ -100,8 +123,9 @@ main{padding:32px 0 16px}
 .snap-hist{margin-top:8px}
 .snap-table{width:100%;border-collapse:collapse;font-size:11px}
 .snap-table th{text-align:left;color:var(--text-muted);font-size:9px;text-transform:uppercase;letter-spacing:.5px;padding:4px 6px;border-bottom:1px solid var(--border)}
-.snap-table td{padding:5px 6px;color:var(--text);border-bottom:1px solid var(--surface-2)}
+.snap-table td{padding:8px 6px;color:var(--text);border-bottom:1px solid var(--surface-2)}
 .snap-table tr:last-child td{border-bottom:none}
+.snap-table tr.snap-latest td{background:rgba(63,185,80,.06)}
 .snap-id-td{font-family:var(--mono);font-size:10px;color:var(--blue)}
 
 /* === CARD ACTION BUTTON === */
@@ -141,8 +165,10 @@ footer code{font-size:10px;color:var(--text);font-family:var(--mono)}
 @media(max-width:1400px){.grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:1100px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:750px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){
   .grid{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
   .hdr-row{flex-direction:column;align-items:flex-start}
   .hdr-meta{align-items:flex-start}
   .stor-bar-row{flex-direction:column;align-items:stretch;gap:10px}
@@ -177,6 +203,9 @@ function formatSize(mb){if(!mb||mb===0)return '0 MB';if(mb<0.1)return '< 0.1 MB'
 function getHealth(bs){if(bs.some(b=>b.status!=='success'))return 'critical';const stale=25*3600*1000;if(bs.some(b=>Date.now()-new Date(b.last_run).getTime()>stale))return 'warning';return 'healthy';}
 function healthLabel(h){return {healthy:'All Systems Healthy',warning:'Backups Stale',critical:'Backup Failure'}[h];}
 function ageClass(iso){const h=(Date.now()-new Date(iso).getTime())/3600000;return h<24?'fresh':h<48?'aging':'stale';}
+function formatLastRun(iso){const d=new Date(iso);const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())} ${mo[d.getMonth()]}`;}
+function totalSnapshots(bs){return bs.reduce((n,b)=>n+(b.snapshots||[]).length,0);}
+function mostRecentRun(bs){return bs.reduce((best,b)=>(!best||new Date(b.last_run)>new Date(best))?b.last_run:best,null);}
 
 // ── COMMANDS ──────────────────────────────────────────────────────
 const NEEDS_SNAP=new Set(['restore-full','restore-temp','list-files']);
@@ -227,7 +256,7 @@ function buildCard(b,idx){
   const name=displayName(b.name,b.type);
   const st=b.status==='success'?'success':'failed';
   const age=ageClass(b.last_run);
-  const snapRows=(b.snapshots||[]).map(s=>`<tr><td><span class="snap">${esc(s.id)}</span></td><td>${esc(formatDate(s.time))}</td><td>${esc(formatSize(s.size_mb))}</td></tr>`).join('');
+  const snapRows=(b.snapshots||[]).map(s=>`<tr${s.id===b.snapshot_id?' class="snap-latest"':''}><td><span class="snap">${esc(s.id)}</span></td><td>${esc(formatDate(s.time))}</td><td>${esc(formatSize(s.size_mb))}</td></tr>`).join('');
   const snapCount=(b.snapshots||[]).length;
   const tagsHtml=b.contents?`<div class="tags">${b.contents.map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div>`:'';
   return `<div class="bcard ${st}">
@@ -252,6 +281,39 @@ function buildCard(b,idx){
 </div>`;
 }
 
+// ── HERO CARD (files backup) ──────────────────────────────────────
+function buildHeroCard(b,idx){
+  const name=displayName(b.name,b.type);
+  const st=b.status==='success'?'success':'failed';
+  const age=ageClass(b.last_run);
+  const snapRows=(b.snapshots||[]).map(s=>`<tr${s.id===b.snapshot_id?' class="snap-latest"':''}><td><span class="snap">${esc(s.id)}</span></td><td>${esc(formatDate(s.time))}</td><td>${esc(formatSize(s.size_mb))}</td></tr>`).join('');
+  const tagsHtml=b.contents?b.contents.map(c=>`<span class="tag">${esc(c)}</span>`).join(''):'';
+  return `<div class="hero-card ${st}">
+  <div class="hero-title-row">
+    <div class="hero-name">${esc(name)}</div>
+    <div class="hero-badges"><span class="hero-type-chip">FILES BACKUP</span><span class="sbadge ${st}"><span class="sdot"></span>${st==='success'?'SUCCESS':'FAILED'}</span></div>
+  </div>
+  <div class="hero-body">
+    <div class="hero-left">
+      <div class="bfields">
+        <div class="bfield"><span class="blbl">Last run</span><span class="bval">${esc(formatDate(b.last_run))}<span class="age-icon ${age}">${IC.clock}</span></span></div>
+        <div class="bfield"><span class="blbl">Snapshot</span><span class="bval"><span class="snap">${esc(b.snapshot_id)}</span></span></div>
+        <div class="bfield"><span class="blbl">Size</span><span class="bval">${esc(formatSize(b.size_mb))}</span></div>
+      </div>
+      <div class="tags" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--surface-2)">${tagsHtml}</div>
+      <div class="bcard-footer"><button class="cmd-btn" onclick="openModal(${idx})">${IC.term} Generate Command</button></div>
+    </div>
+    <div class="hero-right">
+      <div class="snap-section-lbl">Snapshot History</div>
+      <table class="snap-table">
+        <thead><tr><th>ID</th><th>Date / Time</th><th>Size</th></tr></thead>
+        <tbody>${snapRows}</tbody>
+      </table>
+    </div>
+  </div>
+</div>`;
+}
+
 // ── RENDER ────────────────────────────────────────────────────────
 function render(data){
   _backups=data.backups;
@@ -262,6 +324,11 @@ function render(data){
   const pct=repo.drive_percent_used;
   const barCol=pct<60?'var(--green)':pct<80?'var(--amber)':'var(--red)';
   const pctCol=pct<60?'var(--green)':pct<80?'var(--amber)':'var(--red)';
+  const anyFailed=_backups.some(b=>b.status!=='success');
+  const statusVal=anyFailed?`${_backups.filter(b=>b.status!=='success').length} Failed`:'All Healthy';
+  const statusCls=anyFailed?'sc-red':'sc-green';
+  const totalSnaps=totalSnapshots(_backups);
+  const lastRun=mostRecentRun(_backups);
 
   document.getElementById('app').innerHTML=`
 <header class="hdr"><div class="wrap"><div class="hdr-row">
@@ -278,7 +345,13 @@ function render(data){
 <main><div class="wrap">
 
 <div class="section">
-  <div class="sec-label">Backup Drive</div>
+  <div class="sec-label">Overview</div>
+  <div class="stat-grid">
+    <div class="scard ${statusCls}"><div class="scard-val">${esc(statusVal)}</div><div class="scard-lbl">Backup Status</div></div>
+    <div class="scard sc-blue"><div class="scard-val">${_backups.length}</div><div class="scard-lbl">Backups Monitored</div></div>
+    <div class="scard sc-amber"><div class="scard-val">${esc(formatLastRun(lastRun))}</div><div class="scard-lbl">Last Backup Run</div></div>
+    <div class="scard sc-purple"><div class="scard-val">${totalSnaps}</div><div class="scard-lbl">Total Snapshots</div></div>
+  </div>
   <div class="stor-card">
     <div class="stor-path-row"><span style="color:var(--blue)">${IC.disk}</span>${esc(repo.path)}</div>
     <div class="stor-bar-row">
@@ -297,10 +370,9 @@ function render(data){
 
 <div class="section">
   <div class="sec-label">Backups</div>
-  <div class="sub-hdr"><span style="color:var(--blue)">${IC.folder}</span><span class="sub-title">Configuration Files</span><span class="chip">${files.length}</span></div>
-  <div class="grid">${files.map((b,i)=>buildCard(b,_backups.indexOf(b))).join('')}</div>
-  <div class="sub-hdr"><span style="color:var(--amber)">${IC.box}</span><span class="sub-title">Docker Volumes</span><span class="chip">${vols.length}</span></div>
-  <div class="grid">${vols.map((b,i)=>buildCard(b,_backups.indexOf(b))).join('')}</div>
+  ${files.map(b=>buildHeroCard(b,_backups.indexOf(b))).join('')}
+  <div class="sub-hdr" style="margin-top:4px"><span style="color:var(--amber)">${IC.box}</span><span class="sub-title">Docker Volumes</span><span class="chip">${vols.length}</span></div>
+  <div class="grid">${vols.map(b=>buildCard(b,_backups.indexOf(b))).join('')}</div>
 </div>
 
 </div></main>
@@ -324,6 +396,10 @@ function render(data){
           <option value="rebuild">Rebuild repository index</option>
           <option value="unlock">Unlock repository</option>
         </select>
+      </div>
+      <div class="ctrl-grp" id="modal-snap-grp">
+        <label class="ctrl-lbl">Snapshot</label>
+        <select class="ctrl-sel" id="modal-snap" onchange="updateModalCmd()"></select>
       </div>
       <div class="cmd-out">
         <div class="cmd-out-bar">
@@ -350,9 +426,10 @@ function toggleHistory(idx){
 function openModal(idx){
   const b=_backups[idx];
   if(!b)return;
-  _modalSnapId=b.snapshot_id;
   document.getElementById('modal-title').textContent=displayName(b.name,b.type);
   document.getElementById('modal-act').value='restore-full';
+  const snapSel=document.getElementById('modal-snap');
+  snapSel.innerHTML=(b.snapshots||[{id:b.snapshot_id,time:b.last_run,size_mb:b.size_mb}]).map(s=>`<option value="${esc(s.id)}">${esc(s.id)} \u2014 ${esc(formatDate(s.time))} \u2014 ${esc(formatSize(s.size_mb))}</option>`).join('');
   const copyBtn=document.getElementById('modal-copy');
   copyBtn.className='copy-btn';
   copyBtn.innerHTML=IC.copy+' Copy';
@@ -367,7 +444,11 @@ function closeModal(){
 function onOverlayClick(e){if(e.target===document.getElementById('modal'))closeModal();}
 function updateModalCmd(){
   const action=document.getElementById('modal-act').value;
-  _modalCmd=generateCmd(_modalSnapId,action);
+  const needsSnap=NEEDS_SNAP.has(action);
+  const snapGrp=document.getElementById('modal-snap-grp');
+  if(snapGrp)snapGrp.style.display=needsSnap?'':'none';
+  const snapId=needsSnap?(document.getElementById('modal-snap').value||''):'';
+  _modalCmd=generateCmd(snapId,action);
   document.getElementById('modal-cmd').innerHTML=highlight(_modalCmd);
 }
 function modalCopy(){
