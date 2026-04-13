@@ -93,11 +93,12 @@ function buildCard(b,idx){
   const name=displayName(b.name,b.type);
   const st=b.status==='success'?'success':'failed';
   const age=ageClass(b.last_run);
+  const svcKey=b.name.includes('_')?b.name.slice(0,b.name.indexOf('_')):b.name;
   const snapRows=(b.snapshots||[]).map(s=>`<tr${s.id===b.snapshot_id?' class="snap-latest"':''}><td><span class="snap">${esc(s.id)}</span></td><td>${esc(formatDate(s.time))}</td><td>${esc(formatSize(s.size_mb))}</td></tr>`).join('');
   const snapCount=(b.snapshots||[]).length;
   const tagsHtml=b.contents?`<div class="tags">${b.contents.map(c=>`<span class="tag">${esc(c)}</span>`).join('')}</div>`:'';
   return `<div class="bcard ${st}">
-  <div class="bcard-head"><div class="bcard-name">${esc(name)}</div><div class="sbadge ${st}"><span class="sdot"></span>${st==='success'?'SUCCESS':'FAILED'}</div></div>
+  <div class="bcard-head"><div class="bcard-name-row"><span class="bcard-svc-icon">${SVCICONS[svcKey]||SVCICONS._default}</span><span class="bcard-name">${esc(name)}</span></div><div class="sbadge ${st}"><span class="sdot"></span>${st==='success'?'SUCCESS':'FAILED'}</div></div>
   <div class="bfields">
     <div class="bfield"><span class="blbl">Last run</span><span class="bval">${esc(formatDate(b.last_run))}<span class="age-icon ${age}" title="${age}">${IC.clock}</span></span></div>
     <div class="bfield"><span class="blbl">Snapshot</span><span class="bval"><span class="snap">${esc(b.snapshot_id)}</span></span></div>
