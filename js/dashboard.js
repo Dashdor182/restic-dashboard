@@ -178,7 +178,7 @@ function render(data){
   document.getElementById('app').innerHTML=`
 <header class="hdr"><div class="wrap"><div class="hdr-row">
   <div class="hdr-brand">
-    <div class="brand-icon">${IC.server}</div>
+    <div class="brand-icon"><svg width="28" height="28" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><line x1="28" y1="42" x2="52" y2="22" stroke="white" stroke-width="1.5" opacity="0.85"/><line x1="28" y1="42" x2="52" y2="58" stroke="white" stroke-width="1.5" opacity="0.85"/><line x1="28" y1="42" x2="10" y2="52" stroke="white" stroke-width="1.5" opacity="0.8"/><line x1="52" y1="22" x2="52" y2="58" stroke="white" stroke-width="1" opacity="0.6"/><line x1="52" y1="22" x2="70" y2="36" stroke="white" stroke-width="0.8" opacity="0.35"/><circle cx="28" cy="42" r="6" fill="white"/><circle cx="52" cy="22" r="4.5" fill="white"/><circle cx="52" cy="58" r="4.5" fill="white"/><circle cx="10" cy="52" r="3" fill="white" opacity="0.75"/><circle cx="70" cy="36" r="2" fill="white" opacity="0.4"/></svg></div>
     <div class="brand-text"><h1>Backup Status</h1><div class="brand-sub">homeserver &nbsp;·&nbsp; /mnt/backup/restic</div></div>
   </div>
   <div class="hdr-meta">
