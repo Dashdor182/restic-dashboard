@@ -62,7 +62,7 @@ main{padding:32px 0 16px}
 .sub-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .sub-title{font-size:13px;font-weight:600;color:var(--text)}
 .chip{font-size:10px;font-weight:500;background:var(--surface-2);border:1px solid var(--border);border-radius:100px;padding:1px 8px;color:var(--text-muted)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px}
 
 /* BACKUP CARD */
 .bcard{background:var(--surface);border:1px solid var(--border);border-left:3px solid transparent;border-radius:var(--r-lg);padding:15px;transition:box-shadow .2s}
@@ -109,8 +109,10 @@ footer{border-top:1px solid var(--border);padding:20px 0;text-align:center;color
 footer code{font-size:10px;color:var(--text);font-family:var(--mono)}
 
 /* RESPONSIVE */
-@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:580px){
+@media(max-width:1400px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:750px) {.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){
   .grid{grid-template-columns:1fr}
   .hdr-row{flex-direction:column;align-items:flex-start}
   .hdr-meta{align-items:flex-start}
@@ -331,11 +333,11 @@ function render(data) {
         <div class="cmd-controls">
           <div class="ctrl-grp">
             <label class="ctrl-lbl" for="sel-src">Step 1 — Backup Source</label>
-            <select class="ctrl-sel" id="sel-src">${srcOpts}</select>
+            <select class="ctrl-sel" id="sel-src" onchange="updateCmd()">${srcOpts}</select>
           </div>
           <div class="ctrl-grp">
             <label class="ctrl-lbl" for="sel-act">Step 2 — Action</label>
-            <select class="ctrl-sel" id="sel-act">
+            <select class="ctrl-sel" id="sel-act" onchange="updateCmd()">
               <option value="restore-full">Restore full snapshot to original location</option>
               <option value="restore-temp">Restore to temporary location for inspection</option>
               <option value="list-files">List files in snapshot</option>
@@ -348,7 +350,7 @@ function render(data) {
         <div class="cmd-out">
           <div class="cmd-out-bar">
             <span class="cmd-out-lbl">bash</span>
-            <button class="copy-btn" id="copy-btn">${SVG.copy} Copy</button>
+            <button class="copy-btn" id="copy-btn" onclick="copyCmd()">${SVG.copy} Copy</button>
           </div>
           <div class="cmd-code" id="cmd-out"></div>
         </div>
@@ -364,24 +366,19 @@ function render(data) {
 </footer>`;
 
   updateCmd();
-  document.getElementById('sel-src').addEventListener('change', updateCmd);
-  document.getElementById('sel-act').addEventListener('change', updateCmd);
-  document.getElementById('copy-btn').addEventListener('click', copyCmd);
 }
 
 // ===================================================================
 // COMMAND GENERATOR
 // ===================================================================
 function updateCmd() {
-  const action = document.getElementById('sel-act').value;
-  const snapId = document.getElementById('sel-src').value;
-  const srcSel = document.getElementById('sel-src');
-  srcSel.disabled = !NEEDS_SNAP.has(action);
+  const actEl  = document.getElementById('sel-act');
+  const srcEl  = document.getElementById('sel-src');
+  const action = actEl.value;
+  const snapId = srcEl.value;
+  srcEl.disabled = !NEEDS_SNAP.has(action);
   const cmd = generateCmd(snapId, action);
   document.getElementById('cmd-out').innerHTML = highlight(cmd);
-  const btn = document.getElementById('copy-btn');
-  btn.className = 'copy-btn';
-  btn.innerHTML = `${SVG.copy} Copy`;
 }
 
 function copyCmd() {
@@ -409,6 +406,10 @@ function copyCmd() {
 // ===================================================================
 // INIT
 // ===================================================================
+// Expose handlers for inline onchange/onclick attributes
+window.updateCmd = updateCmd;
+window.copyCmd   = copyCmd;
+
 loadData().then(render);
 </script>
 </body>
