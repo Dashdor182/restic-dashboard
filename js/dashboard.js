@@ -14,7 +14,7 @@ function cleanName(name,type){if(type==='volume'){const i=name.indexOf('_');let 
 function displayName(name,type){return cleanName(name,type).split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');}
 function pad(n){return String(n).padStart(2,'0');}
 function formatDate(iso){const d=new Date(iso);const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${pad(d.getDate())} ${mo[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;}
-function formatDateShort(iso){const d=new Date(iso);const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${pad(d.getDate())} ${mo[d.getMonth()]}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;}
+function formatDateShort(iso){const d=new Date(iso);return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;}
 function formatSize(mb){if(!mb||mb===0)return '0 MB';if(mb<0.1)return '< 0.1 MB';if(mb<1000)return `${parseFloat(mb.toFixed(1))} MB`;return `${(mb/1024).toFixed(2)} GB`;}
 function getHealth(bs){if(bs.some(b=>b.status!=='success'))return 'critical';const stale=25*3600*1000;if(bs.some(b=>Date.now()-new Date(b.last_run).getTime()>stale))return 'warning';return 'healthy';}
 function healthLabel(h){return {healthy:'All Systems Healthy',warning:'Backups Stale',critical:'Backup Failure'}[h];}
