@@ -14,7 +14,7 @@ function cleanName(name,type){if(type==='volume'){const i=name.indexOf('_');let 
 function displayName(name,type){return cleanName(name,type).split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');}
 function pad(n){return String(n).padStart(2,'0');}
 function formatDate(iso){const d=new Date(iso);const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${pad(d.getDate())} ${mo[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;}
-function formatDateShort(iso){const d=new Date(iso);return `${pad(d.getDate())}/${pad(d.getMonth()+1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;}
+function formatDateShort(iso){const d=new Date(iso);const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${pad(d.getDate())} ${mo[d.getMonth()]}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;}
 function formatSize(mb){if(!mb||mb===0)return '0 MB';if(mb<0.1)return '< 0.1 MB';if(mb<1000)return `${parseFloat(mb.toFixed(1))} MB`;return `${(mb/1024).toFixed(2)} GB`;}
 function getHealth(bs){if(bs.some(b=>b.status!=='success'))return 'critical';const stale=25*3600*1000;if(bs.some(b=>Date.now()-new Date(b.last_run).getTime()>stale))return 'warning';return 'healthy';}
 function healthLabel(h){return {healthy:'All Systems Healthy',warning:'Backups Stale',critical:'Backup Failure'}[h];}
@@ -26,7 +26,7 @@ function ageTooltip(iso){const mins=Math.floor((Date.now()-new Date(iso).getTime
 function snapWithCopy(id){return `<span class="snap-wrap"><span class="snap">${esc(id)}</span><button class="snap-copy" onclick="copySnap(event,'${esc(id)}')">${IC.copy}</button></span>`;}
 function copyText(text,ok){if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(ok).catch(()=>fbCopy(text,ok));}else{fbCopy(text,ok);}}
 function fbCopy(text,ok){const t=Object.assign(document.createElement('textarea'),{value:text});Object.assign(t.style,{position:'fixed',opacity:'0'});document.body.appendChild(t);t.select();try{document.execCommand('copy');ok();}catch(e){}document.body.removeChild(t);}
-function buildSnapOpts(b){const fmt=window.innerWidth<600?formatDateShort:formatDate;return (b.snapshots||[{id:b.snapshot_id,time:b.last_run,size_mb:b.size_mb}]).map(s=>`<option value="${esc(s.id)}">${esc(s.id)} \u2014 ${esc(fmt(s.time))} \u2014 ${esc(formatSize(s.size_mb))}</option>`).join('');}
+function buildSnapOpts(b){return (b.snapshots||[{id:b.snapshot_id,time:b.last_run,size_mb:b.size_mb}]).map(s=>`<option value="${esc(s.id)}">${esc(s.id)} \u2014 ${esc(formatDateShort(s.time))} \u2014 ${esc(formatSize(s.size_mb))}</option>`).join('');}
 
 // ── COMMANDS ──────────────────────────────────────────────────────
 const NEEDS_SNAP=new Set(['restore-full','restore-temp','list-files']);
@@ -340,6 +340,5 @@ window.modalCopy=modalCopy;
 window.copySnap=copySnap;
 window.toggleOverview=toggleOverview;
 initTooltip();
-let _resizeTmr=null;
-window.addEventListener('resize',()=>{clearTimeout(_resizeTmr);_resizeTmr=setTimeout(()=>{if(_modalBackupIdx>=0){const snapSel=document.getElementById('snap-sel');if(snapSel){snapSel.innerHTML=buildSnapOpts(_backups[_modalBackupIdx]);}}},150);});
+
 loadData().then(render);
