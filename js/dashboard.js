@@ -26,7 +26,7 @@ function ageTooltip(iso){const mins=Math.floor((Date.now()-new Date(iso).getTime
 function snapWithCopy(id){return `<span class="snap-wrap"><span class="snap">${esc(id)}</span><button class="snap-copy" onclick="copySnap(event,'${esc(id)}')">${IC.copy}</button></span>`;}
 function copyText(text,ok){if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(ok).catch(()=>fbCopy(text,ok));}else{fbCopy(text,ok);}}
 function fbCopy(text,ok){const t=Object.assign(document.createElement('textarea'),{value:text});Object.assign(t.style,{position:'fixed',opacity:'0'});document.body.appendChild(t);t.select();try{document.execCommand('copy');ok();}catch(e){}document.body.removeChild(t);}
-function buildSnapOpts(b){return (b.snapshots||[{id:b.snapshot_id,time:b.last_run,size_mb:b.size_mb}]).map(s=>`<option value="${esc(s.id)}">${esc(s.id)} \u2014 ${esc(formatDateShort(s.time))} \u2014 ${esc(formatSize(s.size_mb))}</option>`).join('');}
+function buildSnapOpts(b){return (b.snapshots||[{id:b.snapshot_id,time:b.last_run,size_mb:b.size_mb}]).map(s=>{const _d=new Date(s.time);const _dt=`${String(_d.getDate()).padStart(2,'0')}/${String(_d.getMonth()+1).padStart(2,'0')}/${_d.getFullYear()} ${String(_d.getHours()).padStart(2,'0')}:${String(_d.getMinutes()).padStart(2,'0')}`;return `<option value="${esc(s.id)}">${esc(s.id)} \u2014 ${_dt} \u2014 ${esc(formatSize(s.size_mb))}</option>`;}).join('');}
 
 // ── COMMANDS ──────────────────────────────────────────────────────
 const NEEDS_SNAP=new Set(['restore-full','restore-temp','list-files']);
